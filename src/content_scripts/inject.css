@@ -1,0 +1,6 @@
+/*
+ * This class is appended to all "dangerous" sites to keep user informed.
+ */
+.dangerous-site {
+    box-shadow: inset 0 0 10px #ff3300;
+}

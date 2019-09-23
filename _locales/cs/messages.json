@@ -1,0 +1,26 @@
+{
+  "extensionName": {
+    "message": "Dezi"
+  },
+  "extensionDescription": {
+    "message": "Doplněk zobrazující upozornění při navštívení stránky s nedůvěryhodným, dezinformačním či jinak škodlivým obsahem."
+  },
+  "baSiteIsSafeHeader": {
+    "message": "Web je v pořádku!"
+  },
+  "baSiteIsSafeMessage": {
+    "message": "Tato stránka není na seznamu nebezpečných a dezinformačních webů."
+  },
+  "baReportSiteMessage": {
+    "message": "Je stránka škodlivá? Obsahuje dezinformace? Pomožte nám a nahlaste ji."
+  },
+  "baReportSiteButton": {
+    "message": "Nahlásit stránku"
+  },
+  "baSiteIsNotSafeHeader": {
+    "message": "Stránka není bezpečná!"
+  },
+  "baSiteIsNotSafeMessage": {
+    "message": "Tato stránka je přidána na seznam nebezpečných a dezinformačních webů."
+  }
+}
