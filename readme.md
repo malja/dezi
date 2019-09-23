@@ -21,10 +21,10 @@ Tím se dostanete do vývojářského režimu. Odtud klikněte na tlačítko **N
 
 Otevře se dialogové okno s výběrem souboru. Najděte umístění doplňku a vyberte soubor **manifest.json**.
 
-![Manifest](./docs/images/install_developer_step5.png)
+![Manifest](./docs/images/install_developer_step4.png)
 
 Nainstalovaný doplněk vypadá přibližně následovně:
 
-![Dokončeno](./docs/images/install_developer_step6.png)
+![Dokončeno](./docs/images/install_developer_step5.png)
 
 Vedle adresní lišty prohlížeče se objevila ikona rozšíření.
