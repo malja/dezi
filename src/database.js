@@ -16,6 +16,9 @@ async function updateDatabase() {
                     chrome.storage.local.set({database_last_change: last_change.date});
                     return true;
                 });
+function urlMatch(original, rule) {
+    var escapeRegex = (original) => original.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(original);
             }
         });
         
