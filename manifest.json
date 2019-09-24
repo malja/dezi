@@ -12,7 +12,11 @@
   "default_locale": "cs",
   "background": {
     "scripts": [
+      "src/browser_url_list.js",
+      "src/api.js",
       "src/database.js",
+      "src/background/onAlarm.js",
+      "src/background/onInstall.js",
       "src/background/background.js"
     ],
     "persistent": true
@@ -24,10 +28,12 @@
   },
   "permissions": [
     "tabs",
-    "storage"
+    "alarms",
+    "storage",
+    "http://api.malcak.cz/dezi/*"
   ],
   "web_accessible_resources": [
-    "src/content_scripts/inject.html"
+    "src/content_scripts/modal.html"
   ],
   "content_scripts": [
     {
@@ -36,7 +42,7 @@
         "https://*/*"
       ],
       "css": [
-        "src/content_scripts/inject.css"
+        "src/content_scripts/modal.css"
       ],
       "js": [
         "src/content_scripts/inject.js"
