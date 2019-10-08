@@ -22,5 +22,8 @@
   },
   "baSiteIsNotSafeMessage": {
     "message": "Tato stránka je přidána na seznam nebezpečných a dezinformačních webů."
+  },
+  "baListOfReasonsHeader": {
+    "message": "Seznam důvodů"
   }
 }
