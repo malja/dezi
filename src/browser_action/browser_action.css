@@ -20,6 +20,39 @@
  * IN THE SOFTWARE.
  */
 
+body {
+    width: 400px;
+    display: block;
+    margin: 0;
+    font-size: 1.2em;
+}
+
+section {
+    padding: 20px;
+}
+
+h2 {
+    margin-top: 0px;
+    font-size: 2.5em;
+    font-weight: 100;
+    display: block;
+    border-bottom: 1px dotted;
+}
+
+#safe {
+    background-color: #edf5dc;
+}
+
+#dangerous {
+    background-color: #f5e3dc;
+}
+
+button {
+    display: inline-block;
+    font-size: inherit;
+    padding: 5px;
+}
+
 .hidden {
     display: none;
 }
