@@ -37,7 +37,8 @@ const API_URL_UPDATE_ENDPOINT = "https://api.malcak.cz/dezi/1/list";
 
 /**
  * Returns info about database. In version 1 of the API, it contains number of
- * records (num_records) and last edit date (last_edit).
+ * records (num_records) and last edit date (last_edit). In case of error,
+ * empty object is returned.
  */
 async function apiGetDatabaseInfo() {
     return await fetch(API_URL_INFO_ENDPOINT, {
@@ -48,12 +49,26 @@ async function apiGetDatabaseInfo() {
     }).then((response) => {
         if (response.ok) {
             return response.clone().json().then(data => data["data"]);
+        } else {
+            return {};
         }
     });
 }
 
 /**
- * Returns all links in online database.
+ * Returns array of objects. Each object is one link stored in online database.
+ * When there is any communication error, empty array is returned.
+ * @returns {object} Empty object or copy of online database.
+ * @example Example output
+ * [
+ *  {
+ *      id: 1,
+ *      url: "*my.website.com*",
+ *      reasons: [
+ *          "One", "Two"
+ *      ]
+ *  }
+ * ]
  */
 async function apiGetDatabase() {
     return await fetch(API_URL_UPDATE_ENDPOINT, {
@@ -63,8 +78,38 @@ async function apiGetDatabase() {
         }
     }).then(response => {
         if (response.ok) {
-            return response.clone().json();
+            /*
+             * Expected data format:
+             * {
+             *  status: {
+             *       error: false,
+             *       message: "No error"
+             *   },
+             *   data: [
+             *       {
+             *           id: 1,
+             *           url: "*my.website.com*",
+             *           reasons: [
+             *               "One", "Two"
+             *           ]
+             *       }, 
+             *       ...
+             *   ]
+             * } 
+             */
+            let payload = response.clone().json();
+            if (!payload.status || payload.data.length == 0) {
+                return [];
+            }
+
+            return payload.data;
+
+        } else {
+            return [];
         }
+    }).catch(reason => {
+        console.log("Communication error with the server. Reason: " + reason);
+        return [];
     });
 }
 

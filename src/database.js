@@ -26,6 +26,14 @@
  * @param {string} original URL which should match the rule.
  * @param {string} rule Rule for matching. Use * as wildcard for any number of
  * characters.
+ * @returns {boolean} If there was found a match.
+ * @example
+ * // Returns true
+ * urlMatch("http://my.website.com/", "*website.com*")
+ * @example
+ * // There should be match, but there is not. Without wildcards (*), the https:// and 
+ * // trailing slash (/) make it fail to find a match.
+ * urlMatch("https://my.website.com/", "my.website.com")
  */
 function urlMatch(original, rule) {
     var escapeRegex = (original) => original.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -36,13 +44,23 @@ function urlMatch(original, rule) {
  * Checks if obj contains all keys in listOfKeys.
  * @param {object} obj Object which is checked.
  * @param {array} listOfKeys List of all keys required inside the object.
+ * @returns {boolean} If object contains all required keys.
+ * @example
+ * // Returns true
+ * hasKeys({one: "test", two: 2}, ["one", "two"])
+ * @example
+ * // Returns false - object is empty
+ * hasKeys({}, ["one", "two"])
+ * @example
+ * // Returns false - object does not have key "two"
+ * hasKeys({one: 1, three: "test"}, ["one", "two"])
  */
 function hasKeys(obj, listOfKeys) {
     // Object is empty
     if (Object.getOwnPropertyNames(obj).length == 0) {
         return false;
     }
-    
+
     if (!Array.isArray(listOfKeys) || listOfKeys.length == 0) {
         throw TypeError("List of keys has to be an array");
     }
@@ -58,24 +76,37 @@ function hasKeys(obj, listOfKeys) {
 };
 
 /**
- * Check if url is an internal one (used by the browser).
+ * Check if url is an internal one (used by the browser). Currently, only
+ * chrome:// protocol and about: prefix (in Firefox) is tested. So when
+ * urls starts with one of those two "strings", it is matched as
+ * internal browser URL.
  * @param {string} url_check Current URL which should be tested.
+ * @returns {boolean} Is it an internal URL
+ * @example
+ * // Returns true
+ * isBrowserUrl("chrome://about")
+ * @example
+ * // Returns true
+ * isBrowserUrl("about:about")
+ * @example
+ * // Returns false
+ * isBrowserUrl("https://my.website.com")
  */
 function isBrowserUrl(url_check) {
-    
+
     if (typeof url_check !== "string") {
         throw TypeError("Url is not a string.");
     }
 
     let url = new URL(url_check);
-    
+
     // In chrome, all internal URLs start with chrome:// protocol
     if (browser_url_list.includes(url.protocol)) {
         return true;
     }
 
     // In firefox, internal urls start with about:
-    for(let browser_url of browser_url_list) {
+    for (let browser_url of browser_url_list) {
         if (url_check.startsWith(browser_url)) {
             return true;
         }
@@ -105,14 +136,14 @@ function getLocalSettings() {
  * @param {string} url_check URL for which should be the settings returned.
  */
 async function getUserSettingsForUrl(url_check) {
-    
+
     let defaut_settings = {
         ignore: false,
         lastPopup: "1990-01-01T01:01:01"
     };
 
     let settings = await getLocalSettings();
-    
+
     if (url_check in settings.websites) {
         return settings.websites[url_check];
     }
@@ -147,7 +178,7 @@ function getLocalDatabase() {
  */
 async function getUrlInfo(url_check) {
 
-    let default_info ={
+    let default_info = {
         info: {},
         isDangerous: false,
         isBrowser: isBrowserUrl(url_check),
@@ -165,7 +196,7 @@ async function getUrlInfo(url_check) {
         if (urlMatch(url_check, record.url)) {
             // Get settings for URL
             let settings = await getUserSettingsForUrl(record.url);
-            
+
             // Merge default settings with new data
             Object.assign(default_info, {
                 info: record,
@@ -192,20 +223,24 @@ async function updateDatabase() {
     chrome.storage.sync.get(["database_last_change"], (result) => {
         apiGetDatabaseInfo().then((info) => {
             // Is offline database outdated?
-            if ( Date.parse(info.last_edit) > Date.parse(result.database_last_change) ) {
+            if (Date.parse(info.last_edit) > Date.parse(result.database_last_change)) {
                 // Download updates
                 apiGetDatabase().then(db => {
-                    
+
                     let data = db["data"];
                     // And store them
-                    chrome.storage.sync.set({database: data});
+                    chrome.storage.sync.set({
+                        database: data
+                    });
 
-                    chrome.storage.sync.set({database_last_change: info.last_change});
+                    chrome.storage.sync.set({
+                        database_last_change: info.last_change
+                    });
                     return true;
                 });
             }
         });
-        
+
         return false;
     });
 }
