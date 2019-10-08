@@ -25,31 +25,38 @@
  * extension icon).
  * It shows one of three sections based on URL in current tab.
  */
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener("DOMContentLoaded", function (event) {
 
     // Translate __MSG_<ID>__ to string stored in _locales
     translateHtml(this.getElementsByTagName("body"));
 
     // Get current tab's URL
-    chrome.tabs.query({active: true, currentWindow: true}, (response) => {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, (response) => {
         let currentTab = response[0];
 
         // Register listener for report button
         document.getElementById("actionReportSite").addEventListener("onclick", apiReportSite(currentTab.url));
 
         // Check the URL agains the database
-        chrome.runtime.sendMessage({target: "bg", type: "checkURL", data: currentTab.url}, (response) => {
+        chrome.runtime.sendMessage({
+            target: "bg",
+            type: "checkURL",
+            data: currentTab.url
+        }, (response) => {
 
             // Site is dangerous, show warning
             if (response.data.isDangerous) {
                 let reasons_list = document.getElementById("dangerousReason");
-                
+
                 // Fill reasons
-                response.data.info.reasons.forEach( (reason) => {
+                response.data.info.reasons.forEach((reason) => {
                     // Create new <li> tag with text
                     let reason_item = document.createElement("li");
                     reason_item.innerText = reason;
-                    
+
                     // And append it
                     reasons_list.appendChild(reason_item);
                 });
@@ -58,9 +65,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
                 document.getElementById("dangerous").classList.remove("hidden");
                 // And hide "Main" section
                 document.getElementById("main").classList.add("hidden");
-                
+
             } else {
-                
+
                 // I want to show different message for safe websites and browser's URLs
                 // (for example home, history, etc.)
                 if (!response.data.isBrowser) {
