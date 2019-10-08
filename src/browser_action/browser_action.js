@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
     chrome.tabs.query({active: true, currentWindow: true}, (response) => {
         let currentTab = response[0];
 
+        // Register listener for report button
+        document.getElementById("actionReportSite").addEventListener("onclick", apiReportSite(currentTab.url));
+
         // Check the URL agains the database
         chrome.runtime.sendMessage({target: "bg", type: "checkURL", data: currentTab.url}, (response) => {
 

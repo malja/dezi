@@ -71,18 +71,16 @@ async function apiGetDatabase() {
 /**
  * Sends new report back to the server.
  * @param {string} url Link to reported URL.
- * @param {string} reason Short description why should be the site reported.
  * @returns True if site was reported successfully. 
  */
-async function apiReportSite(url, reason) {
+async function apiReportSite(url) {
     return await fetch(API_URL_REPORT_ENDPOINT, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: {
-            "url": url,
-            "reason": reason
+            "url": url
         }
     }).then((response) => {
         if (!response.ok) {
