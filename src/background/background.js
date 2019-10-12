@@ -83,4 +83,18 @@ chrome.runtime.onMessage.addListener((request, sender, reply) => {
 
     return true;
   }
+
+  if (request.type == "openErrorPage") {
+    chrome.tabs.create({
+        url: chrome.extension.getURL("/src/error/error_report.html?error=" + request.data.errorId),
+        active: true
+      },
+      (tab) => {
+        chrome.tabs.highlight({
+          windowId: tab.windowId,
+          tabs: tab.id
+        })
+      }
+    );
+  }
 });

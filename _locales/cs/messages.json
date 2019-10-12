@@ -25,5 +25,29 @@
   },
   "baListOfReasonsHeader": {
     "message": "Seznam důvodů"
+  },
+  "baSiteReportFailed": {
+    "message": "Nahlášení stránky se nezdařilo!"
+  },
+  "baSiteReportSucessful": {
+    "message": "Stránka byla nahlášena. Děkujeme."
+  },
+  "erPageTitle": {
+    "message": "Hlášení chyby"
+  },
+  "erPageDescription": {
+    "message": "Tato obrazovka se zobrazuje jen v případech, kdy se v rozšíření vyskytne kritická chyba. Cílem je informovat, že se rozšíření nemusí chovat tak, jak očekáváte."
+  },
+  "erWhatHappenedHeader": {
+    "message": "Co se stalo?"
+  },
+  "erMessageUnknown": {
+    "message": "Víte jak jsme psali, že určitě půjde o něco podstatného? Tak nešlo. Nejspíš nějaké fake news."
+  },
+  "erMessageApiKey": {
+    "message": "Nepodařilo se domluvit se serverem. To je velký problém, protože na něm je uložen seznam škodlivých stránek. \nCo s tím? Zkontrolujte, že jste připojeni k internetu. Pokud tento text vidíte častěji, pomožte nám a problém nahlaste."
+  },
+  "erMessageUpdate": {
+    "message": "Pokusili jsme se aktualizovat seznam škodlivých stránek. Snažíme se jej totiž udržovat co nejaktuálnější. \nJenže se data po cestě nějak zatoulala a aktualizace se nezdařila. \nCo s tím? Pokusíme se seznam aktualizovat později. Jen jsme Vás chtěli informovat."
   }
 }
