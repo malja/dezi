@@ -116,7 +116,7 @@ function isBrowserUrl(url_check) {
 }
 
 /**
- * Asynchronously return local user settings.
+ * Asynchronously returns local user settings.
  */
 function getLocalSettings() {
     return new Promise((resolve, reject) => {
@@ -192,21 +192,23 @@ async function getUrlInfo(url_check) {
     let database = await getLocalDatabase();
 
     for (record of database) {
-        // This record's URL is matching with url_check
-        if (urlMatch(url_check, record.url)) {
-            // Get settings for URL
-            let settings = await getUserSettingsForUrl(record.url);
+        for (link in record.links) {
+            // This record's URL is matching with url_check
+            if (urlMatch(url_check, link)) {
+                // Get settings for URL
+                let settings = await getUserSettingsForUrl(link);
 
-            // Merge default settings with new data
-            Object.assign(default_info, {
-                info: record,
-                isDangerous: true,
-                linkMoreInfo: "TODO"
-            }, {
-                userSettings: settings
-            });
+                // Merge default settings with new data
+                Object.assign(default_info, {
+                    info: record,
+                    isDangerous: true,
+                    linkMoreInfo: "TODO"
+                }, {
+                    userSettings: settings
+                });
 
-            return default_info;
+                return default_info;
+            }
         }
     }
 
@@ -230,6 +232,7 @@ async function updateDatabase() {
                     if (db === false) {
                         showError("Update");
                         return false;
+                    }
 
                     // And store them
                     chrome.storage.sync.set({
