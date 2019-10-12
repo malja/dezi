@@ -21,3 +21,23 @@ Nakonec klikněte na tlačítko **Načíst nerozbalené** na levé straně a vyb
 rozšíření.
 
 ![Rozšíření](./docs/images/install_developer_step3.png)
+
+# Dokumentace
+
+Dokumentace je generována příkazem:
+
+```bash
+jsdoc src -d "./docs" -r
+```
+
+v hlavní složce doplňku.
+
+# Testy
+
+Testy se spouští příkazem:
+
+```bash
+node test
+```
+
+v hlavní složce doplňku.
