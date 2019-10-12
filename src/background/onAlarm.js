@@ -27,5 +27,29 @@
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name == "checkOnlineDatabase") {
         updateDatabase();
+        return;
+    }
+
+    // Register again, after failure
+    if (alarm.name == "requestApiKey") {
+        apiGetApiKey().then(apiKey => {
+            if (apiKey === false) {
+
+                // Open new tab with error message
+                showError("ApiKey");
+
+                // Try again in 30 minutes
+                // Hardcoded
+                chrome.alarms.create("requestApiKey", {
+                    delayInMinutes: 30
+                });
+                return;
+            }
+
+            // Save API key
+            chrome.storage.sync.set({
+                api_key: apiKey
+            });
+        })
     }
 });

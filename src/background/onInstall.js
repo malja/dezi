@@ -33,10 +33,27 @@ chrome.runtime.onInstalled.addListener((details) => {
         database: [],   // empty for now
         user_settings: {
             websites: {}
-        }
+        },
+        api_key: "" // empty for now
     });
 
-    updateDatabase();
+    // Request new API key from the server
+    apiGetApiKey().then(key => {
+        if (key === false) {
+
+            // Show new tab with error message
+            showError("ApiKey");
+
+            // Try again in 30 minutes
+            // Hardcoded
+            chrome.alarms.create("requestApiKey", {
+                delayInMinutes: 30
+            });
+
+        } else {
+            chrome.storage.sync.set({
+                api_key: key
+            });
 
     // Create alarm for updating local database
     chrome.alarms.create("checkOnlineDatabase", {

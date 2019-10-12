@@ -36,22 +36,70 @@ const API_URL_REPORT_ENDPOINT = "https://api.malcak.cz/dezi/1/report";
 const API_URL_UPDATE_ENDPOINT = "https://api.malcak.cz/dezi/1/list";
 
 /**
- * Returns info about database. In version 1 of the API, it contains number of
- * records (num_records) and last edit date (last_edit). In case of error,
- * empty object is returned.
+ * Link to endpoint which returns API key required for following communication.
  */
-async function apiGetDatabaseInfo() {
-    return await fetch(API_URL_INFO_ENDPOINT, {
+const API_URL_REGISTER_ENDPOINT = "https://api.malcak.cz/dezi/1/register";
+
+/**
+ * Registers this client in server. This process creates an API key which
+ * is required for all future communication with the server.
+ * No data is sent to the server to identificate the client itself.
+ * @returns {string|boolean} API key or false on error.
+ */
+async function apiGetApiKey() {
+    return await fetch(API_URL_REGISTER_ENDPOINT, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
-    }).then((response) => {
+    }).then(async (response) => {
+        let payload = await response.clone().json();
         if (response.ok) {
-            return response.clone().json().then(data => data["data"]);
+            // Return API key itself
+            return payload.data.key;
         } else {
-            return {};
+            console.error("API responded with error: " + payload.status.message);
+            return false;
         }
+    }).catch(error => {
+        console.error("Communication with server failed: " + error);
+        return false;
+    });
+}
+
+/**
+ * Returns info about database. It contains number of records (num_records)
+ * and last edit date (last_edit). In case of error, false is returned.
+ * @param {string} apiKey Key returned from registration.
+ * @returns {object|boolean} Returns object with database information or false
+ * on error.
+ * @example Returned object
+ * {
+ *  num_records: 100,
+ *  last_edit: 1570613353
+ * }
+ */
+async function apiGetDatabaseInfo(apiKey) {
+
+    let url = new URL(API_URL_INFO_ENDPOINT);
+    url.searchParams.append("key", apiKey);
+
+    return await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(async (response) => {
+        let payload = await response.clone().json();
+        if (response.ok) {
+            return payload.data;
+        } else {
+            console.error("API server responded with error: " + payload.status.message);
+            return false;
+        }
+    }).catch(error => {
+        console.error("Communication with server failed: " + error);
+        return false;
     });
 }
 
@@ -70,8 +118,10 @@ async function apiGetDatabaseInfo() {
  *  }
  * ]
  */
-async function apiGetDatabase() {
-    return await fetch(API_URL_UPDATE_ENDPOINT, {
+async function apiGetDatabase(apiKey) {
+    let url = new URL(API_URL_UPDATE_ENDPOINT);
+    url.searchParams.append("key", apiKey);
+
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -118,8 +168,11 @@ async function apiGetDatabase() {
  * @param {string} url Link to reported URL.
  * @returns True if site was reported successfully. 
  */
-async function apiReportSite(url) {
-    return await fetch(API_URL_REPORT_ENDPOINT, {
+async function apiReportSite(url, apiKey) {
+    let apiUrl = new URL(API_URL_REPORT_ENDPOINT);
+    apiUrl.searchParams.append("key", apiKey);
+
+    return await fetch(apiUrl.toString(), {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

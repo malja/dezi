@@ -217,25 +217,29 @@ async function getUrlInfo(url_check) {
 
 /**
  * Checks for updates and downloads them if necessary.
- * @returns True if database was updated.
+ * @returns {boolean} True if database was updated.
  */
 async function updateDatabase() {
-    chrome.storage.sync.get(["database_last_change"], (result) => {
-        apiGetDatabaseInfo().then((info) => {
+    chrome.storage.sync.get(["database_last_change", "api_key"], (result) => {
+        apiGetDatabaseInfo(result.api_key).then((info) => {
             // Is offline database outdated?
             if (Date.parse(info.last_edit) > Date.parse(result.database_last_change)) {
                 // Download updates
-                apiGetDatabase().then(db => {
+                apiGetDatabase(result.api_key).then(db => {
 
-                    let data = db["data"];
+                    if (db === false) {
+                        showError("Update");
+                        return false;
+
                     // And store them
                     chrome.storage.sync.set({
-                        database: data
+                        database: db
                     });
 
                     chrome.storage.sync.set({
                         database_last_change: info.last_change
                     });
+
                     return true;
                 });
             }
