@@ -105,15 +105,18 @@ async function apiGetDatabaseInfo(apiKey) {
 
 /**
  * Returns array of objects. Each object is one link stored in online database.
- * When there is any communication error, empty array is returned.
- * @returns {object} Empty object or copy of online database.
+ * When there is any communication error, false is returned.
+ * @param {string} apiKey Key returned from registration.
+ * @returns {array|false} Array of objects or false on error.
  * @example Example output
  * [
  *  {
- *      id: 1,
- *      url: "*my.website.com*",
+ *      website: "my.website.com",
+ *      links: [
+ *          "*my.website.com*"
+ *      ],
  *      reasons: [
- *          "One", "Two"
+ *          "reasonId1", "reasonId2"
  *      ]
  *  }
  * ]
@@ -122,51 +125,30 @@ async function apiGetDatabase(apiKey) {
     let url = new URL(API_URL_UPDATE_ENDPOINT);
     url.searchParams.append("key", apiKey);
 
+    return await fetch(url.toString(), {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
-    }).then(response => {
+    }).then(async (response) => {
+        let payload = await response.clone().json();
         if (response.ok) {
-            /*
-             * Expected data format:
-             * {
-             *  status: {
-             *       error: false,
-             *       message: "No error"
-             *   },
-             *   data: [
-             *       {
-             *           id: 1,
-             *           url: "*my.website.com*",
-             *           reasons: [
-             *               "One", "Two"
-             *           ]
-             *       }, 
-             *       ...
-             *   ]
-             * } 
-             */
-            let payload = response.clone().json();
-            if (!payload.status || payload.data.length == 0) {
-                return [];
-            }
-
             return payload.data;
-
         } else {
-            return [];
+            console.error("API responded with error: " + payload.status.message);
+            return false;
         }
     }).catch(reason => {
-        console.log("Communication error with the server. Reason: " + reason);
-        return [];
+        console.error("Communication error with the server. Reason: " + reason);
+        return false;
     });
 }
 
 /**
  * Sends new report back to the server.
  * @param {string} url Link to reported URL.
- * @returns True if site was reported successfully. 
+ * @param {string} apiKey Key obtained from registration.
+ * @returns {boolean} True if site was reported successfully. 
  */
 async function apiReportSite(url, apiKey) {
     let apiUrl = new URL(API_URL_REPORT_ENDPOINT);
@@ -180,11 +162,17 @@ async function apiReportSite(url, apiKey) {
         body: {
             "url": url
         }
-    }).then((response) => {
+    }).then(async (response) => {
+
+        let payload = await response.clone().json();
         if (!response.ok) {
             return false;
         } else {
+            console.error("API responded with error: " + payload.status.message);
             return true;
         }
+    }).catch(reason => {
+        console.error("Communication error with the server. Reason: " + reason);
+        return false;
     });
 }
