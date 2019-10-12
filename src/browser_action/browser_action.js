@@ -21,6 +21,20 @@
  */
 
 /**
+ * Shows element for few ms and then hides it again.
+ * @param {DOMElement} element Element which should be animated.
+ * @param {number} time Number of ms for which should the dialog be visible.
+ */
+function animateDialog(element, time = 3500) {
+
+    element.classList.remove("hidden");
+    setTimeout((what) => {
+        what.classList.add("hidden");
+    }, time, element);
+}
+
+
+/**
  * This script "handles" what is shown in popup window (after clicking on 
  * extension icon).
  * It shows one of three sections based on URL in current tab.
@@ -38,7 +52,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
         let currentTab = response[0];
 
         // Register listener for report button
-        document.getElementById("actionReportSite").addEventListener("onclick", apiReportSite(currentTab.url));
+        document.getElementById("actionReportSite").addEventListener("click", () => {
+
+            // Load API key
+            chrome.storage.sync.get("api_key", response => {
+                // Try to report site
+                apiReportSite(currentTab.url, response.api_key).then(reported => {
+                    if (reported) {
+                        animateDialog(document.getElementById("dialogReportFailed"));
+                    } else {
+                        animateDialog(document.getElementById("dialogReportSuccessful"));
+                    }
+                });
+            });
+        });
 
         // Check the URL agains the database
         chrome.runtime.sendMessage({

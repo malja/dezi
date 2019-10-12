@@ -47,6 +47,28 @@ h2 {
     background-color: #f5e3dc;
 }
 
+dialog#dialogReportFailed {
+    background-color: #ffd4c3;
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 20px;
+    width: 100%;
+    border: 0;
+}
+
+dialog#dialogReportSuccessful {
+    background-color: azure;
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 20px;
+    width: 100%;
+    border: 0;
+}
+
 button {
     display: inline-block;
     font-size: inherit;
@@ -54,5 +76,5 @@ button {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
