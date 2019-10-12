@@ -30,7 +30,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.sync.set({
         // Just to make sure update will be done anyways
         database_last_change: "1990-01-01T01:01:01",
-        database: [],   // empty for now
+        database: [], // empty for now
         user_settings: {
             websites: {}
         },
@@ -55,9 +55,14 @@ chrome.runtime.onInstalled.addListener((details) => {
                 api_key: key
             });
 
-    // Create alarm for updating local database
-    chrome.alarms.create("checkOnlineDatabase", {
-        periodInMinutes: 60*24,
-        delayInMinutes: 60*24
-    })
+            updateDatabase();
+
+            // Create alarm for updating local database
+            // Hardcoded
+            chrome.alarms.create("checkOnlineDatabase", {
+                periodInMinutes: 60 * 24,
+                delayInMinutes: 60 * 24
+            });
+        }
+    });
 });

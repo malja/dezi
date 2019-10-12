@@ -42,12 +42,12 @@ function replacePlaceholders(element, text) {
  * @param {Element} element HTML element root for translation.
  */
 function translateHtml(element) {
-    
+
     if (element instanceof NodeList || element instanceof HTMLCollection) {
-        for(let children of element) {
+        for (let children of element) {
             replacePlaceholders(children, children.innerHTML.toString());
         }
-    } else {        
+    } else {
         replacePlaceholders(element, element.innerHTML.toString());
     }
 }

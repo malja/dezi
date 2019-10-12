@@ -13,6 +13,7 @@
   "background": {
     "scripts": [
       "src/browser_url_list.js",
+      "src/error.js",
       "src/api.js",
       "src/database.js",
       "src/background/onAlarm.js",
@@ -35,18 +36,16 @@
   "web_accessible_resources": [
     "src/content_scripts/modal.html"
   ],
-  "content_scripts": [
-    {
-      "run_at": "document_start",
-      "matches": [
-        "https://*/*"
-      ],
-      "css": [
-        "src/content_scripts/modal.css"
-      ],
-      "js": [
-        "src/content_scripts/inject.js"
-      ]
-    }
-  ]
+  "content_scripts": [{
+    "run_at": "document_start",
+    "matches": [
+      "https://*/*"
+    ],
+    "css": [
+      "src/content_scripts/modal.css"
+    ],
+    "js": [
+      "src/content_scripts/inject.js"
+    ]
+  }]
 }

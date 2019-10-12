@@ -38,12 +38,14 @@
  *            In case of "updateWebsiteSettings", data is "object" and contains
  *            two fields:
  *              - url     - String with URL.
- *              - ingore  - Boolean informing if user decided to ignore warning
+ *              - ignore  - Boolean informing if user decided to ignore warning
  *                          for this website.
  */
 chrome.runtime.onMessage.addListener((request, sender, reply) => {
   // Interested only in messages for background page
-  if (request.target != "bg") { return; }
+  if (request.target != "bg") {
+    return;
+  }
 
   // URL should be checked within database.
   if (request.type == "checkURL") {
@@ -70,16 +72,14 @@ chrome.runtime.onMessage.addListener((request, sender, reply) => {
           ignore: request.data.ignore,
           lastPopup: new Date().toString()
         };
-  
+
         // And save the object back to browser
         chrome.storage.sync.set({
           user_settings: settings
         });
-  
-      });
-    })
 
-    
+      });
+    });
 
     return true;
   }
