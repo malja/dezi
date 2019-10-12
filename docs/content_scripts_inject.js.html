@@ -57,8 +57,8 @@ function showPopup(url) {
 
 	// Load modal's html code from given file
 	fetch(chrome.extension.getURL('./src/content_scripts/modal.html'))
-    	.then(response => response.text())
-    	.then(data => {
+		.then(response => response.text())
+		.then(data => {
 
 			// Append my modal to &lt;html> tag
 			document.documentElement.innerHTML += data;
@@ -67,11 +67,11 @@ function showPopup(url) {
 			document.getElementById("dezi-modal-close").onclick = () => {
 				window.location.reload();
 				chrome.runtime.sendMessage({
-					target: "bg", 
-					type: "updateWebsiteSettings", 
+					target: "bg",
+					type: "updateWebsiteSettings",
 					data: {
 						url: window.location.href,
-						ignore: false 
+						ignore: false
 					}
 				});
 			}
@@ -81,10 +81,10 @@ function showPopup(url) {
 				window.location.reload();
 				chrome.runtime.sendMessage({
 					target: "bg",
-					type: "updateWebsiteSettings", 
+					type: "updateWebsiteSettings",
 					data: {
 						url: window.location.href,
-						ignore: true 
+						ignore: true
 					}
 				});
 			}
@@ -95,7 +95,11 @@ function showPopup(url) {
  * Request info about current tab's URL from background page and show modal
  * window when necessary.
  */
-chrome.runtime.sendMessage({target: "bg", type: "checkURL", data: window.location.href}, (response) => {
+chrome.runtime.sendMessage({
+	target: "bg",
+	type: "checkURL",
+	data: window.location.href
+}, (response) => {
 	let website = response.data;
 
 	if (website.isDangerous) {
@@ -103,9 +107,9 @@ chrome.runtime.sendMessage({target: "bg", type: "checkURL", data: window.locatio
 		// Calculate number of seconds since last popup was shown for current URL
 		let now = new Date().getTime();
 		let last_popup = new Date(website.userSettings.lastPopup).getTime();
-		let seconds_since_last_popup = (now - last_popup)/1000;
+		let seconds_since_last_popup = (now - last_popup) / 1000;
 
-		// TODO: Change to dynamicaly loaded number of seconds
+		// Hardcoded
 		if (seconds_since_last_popup > 30 &amp;&amp; !website.userSettings.ignore) {
 			showPopup(website.url);
 		}
@@ -120,13 +124,13 @@ chrome.runtime.sendMessage({target: "bg", type: "checkURL", data: window.locatio
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#API_URL_INFO_ENDPOINT">API_URL_INFO_ENDPOINT</a></li><li><a href="global.html#API_URL_REPORT_ENDPOINT">API_URL_REPORT_ENDPOINT</a></li><li><a href="global.html#API_URL_UPDATE_ENDPOINT">API_URL_UPDATE_ENDPOINT</a></li><li><a href="global.html#apiGetDatabase">apiGetDatabase</a></li><li><a href="global.html#apiGetDatabaseInfo">apiGetDatabaseInfo</a></li><li><a href="global.html#apiReportSite">apiReportSite</a></li><li><a href="global.html#browser_url_list">browser_url_list</a></li><li><a href="global.html#getLocalDatabase">getLocalDatabase</a></li><li><a href="global.html#getLocalSettings">getLocalSettings</a></li><li><a href="global.html#getUrlInfo">getUrlInfo</a></li><li><a href="global.html#getUserSettingsForUrl">getUserSettingsForUrl</a></li><li><a href="global.html#hasKeys">hasKeys</a></li><li><a href="global.html#isBrowserUrl">isBrowserUrl</a></li><li><a href="global.html#replacePlaceholders">replacePlaceholders</a></li><li><a href="global.html#showPopup">showPopup</a></li><li><a href="global.html#translateHtml">translateHtml</a></li><li><a href="global.html#updateDatabase">updateDatabase</a></li><li><a href="global.html#urlMatch">urlMatch</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#animateDialog">animateDialog</a></li><li><a href="global.html#API_URL_INFO_ENDPOINT">API_URL_INFO_ENDPOINT</a></li><li><a href="global.html#API_URL_REGISTER_ENDPOINT">API_URL_REGISTER_ENDPOINT</a></li><li><a href="global.html#API_URL_REPORT_ENDPOINT">API_URL_REPORT_ENDPOINT</a></li><li><a href="global.html#API_URL_UPDATE_ENDPOINT">API_URL_UPDATE_ENDPOINT</a></li><li><a href="global.html#apiGetApiKey">apiGetApiKey</a></li><li><a href="global.html#apiGetDatabase">apiGetDatabase</a></li><li><a href="global.html#apiGetDatabaseInfo">apiGetDatabaseInfo</a></li><li><a href="global.html#apiReportSite">apiReportSite</a></li><li><a href="global.html#browser_url_list">browser_url_list</a></li><li><a href="global.html#getLocalDatabase">getLocalDatabase</a></li><li><a href="global.html#getLocalSettings">getLocalSettings</a></li><li><a href="global.html#getUrlInfo">getUrlInfo</a></li><li><a href="global.html#getUserSettingsForUrl">getUserSettingsForUrl</a></li><li><a href="global.html#hasKeys">hasKeys</a></li><li><a href="global.html#isBrowserUrl">isBrowserUrl</a></li><li><a href="global.html#replacePlaceholders">replacePlaceholders</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showPopup">showPopup</a></li><li><a href="global.html#translateHtml">translateHtml</a></li><li><a href="global.html#updateDatabase">updateDatabase</a></li><li><a href="global.html#urlMatch">urlMatch</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Sep 30 2019 09:48:36 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Oct 12 2019 19:35:26 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

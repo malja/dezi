@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: translate.js</title>
+    <title>JSDoc: Source: error.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: translate.js</h1>
+    <h1 class="page-title">Source: error.js</h1>
 
     
 
@@ -49,35 +49,23 @@
  */
 
 /**
- * Finds all occurences of __MSG_&lt;MessageID>__ tags in HTML file and replaces
- * them with matching translation.
- * @param {Element} element Parent HTML element. Result is set as content of this element.
- * @param {string}  text    Element content (html or text).
+ * Opens a new tab with page displaying error message and description of 
+ * what happened.
+ * @param {string} errorId Error ID is unique string representing message
+ * in _locales. Full name is not used, in fact, only part after 
+ * "erMessage" is. For example, errorId "Unknown" translates to
+ * "erMessageUnknown".
+ * @example
+ * showError("ApiKey"); // Shows error message erMessageApiKey
  */
-function replacePlaceholders(element, text) {
-    let output = text.replace(/__MSG_(\w+)__/g, (match, messageId) => {
-        let message = chrome.i18n.getMessage(messageId);
-        return message == "" ? messageId : message;
-    });
-
-    element.innerHTML = output;
-}
-
-/**
- * Recursivelly translates HTML tag. Translation is done by replacing all occurences of
- * __MSG_&lt;messageID>__ tags in HTML source code. Note: Root element is not translated.
- * 
- * @param {Element} element HTML element root for translation.
- */
-function translateHtml(element) {
-
-    if (element instanceof NodeList || element instanceof HTMLCollection) {
-        for (let children of element) {
-            replacePlaceholders(children, children.innerHTML.toString());
+function showError(errorId) {
+    chrome.runtime.sendMessage({
+        target: "bg",
+        type: "openErrorPage",
+        data: {
+            errorId: errorId,
         }
-    } else {
-        replacePlaceholders(element, element.innerHTML.toString());
-    }
+    });
 }</code></pre>
         </article>
     </section>

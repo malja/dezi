@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: translate.js</title>
+    <title>JSDoc: Source: browser_action/browser_action.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: translate.js</h1>
+    <h1 class="page-title">Source: browser_action/browser_action.js</h1>
 
     
 
@@ -49,36 +49,94 @@
  */
 
 /**
- * Finds all occurences of __MSG_&lt;MessageID>__ tags in HTML file and replaces
- * them with matching translation.
- * @param {Element} element Parent HTML element. Result is set as content of this element.
- * @param {string}  text    Element content (html or text).
+ * Shows element for few ms and then hides it again.
+ * @param {DOMElement} element Element which should be animated.
+ * @param {number} time Number of ms for which should the dialog be visible.
  */
-function replacePlaceholders(element, text) {
-    let output = text.replace(/__MSG_(\w+)__/g, (match, messageId) => {
-        let message = chrome.i18n.getMessage(messageId);
-        return message == "" ? messageId : message;
-    });
+function animateDialog(element, time = 3500) {
 
-    element.innerHTML = output;
+    element.classList.remove("hidden");
+    setTimeout((what) => {
+        what.classList.add("hidden");
+    }, time, element);
 }
 
-/**
- * Recursivelly translates HTML tag. Translation is done by replacing all occurences of
- * __MSG_&lt;messageID>__ tags in HTML source code. Note: Root element is not translated.
- * 
- * @param {Element} element HTML element root for translation.
- */
-function translateHtml(element) {
 
-    if (element instanceof NodeList || element instanceof HTMLCollection) {
-        for (let children of element) {
-            replacePlaceholders(children, children.innerHTML.toString());
-        }
-    } else {
-        replacePlaceholders(element, element.innerHTML.toString());
-    }
-}</code></pre>
+/**
+ * This script "handles" what is shown in popup window (after clicking on 
+ * extension icon).
+ * It shows one of three sections based on URL in current tab.
+ */
+document.addEventListener("DOMContentLoaded", function (event) {
+
+    // Translate __MSG_&lt;ID>__ to string stored in _locales
+    translateHtml(this.getElementsByTagName("body"));
+
+    // Get current tab's URL
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, (response) => {
+        let currentTab = response[0];
+
+        // Register listener for report button
+        document.getElementById("actionReportSite").addEventListener("click", () => {
+
+            // Load API key
+            chrome.storage.sync.get("api_key", response => {
+                // Try to report site
+                apiReportSite(currentTab.url, response.api_key).then(reported => {
+                    if (reported) {
+                        animateDialog(document.getElementById("dialogReportFailed"));
+                    } else {
+                        animateDialog(document.getElementById("dialogReportSuccessful"));
+                    }
+                });
+            });
+        });
+
+        // Check the URL agains the database
+        chrome.runtime.sendMessage({
+            target: "bg",
+            type: "checkURL",
+            data: currentTab.url
+        }, (response) => {
+
+            // Site is dangerous, show warning
+            if (response.data.isDangerous) {
+                let reasons_list = document.getElementById("dangerousReason");
+
+                // Fill reasons
+                response.data.info.reasons.forEach((reason) => {
+                    // Create new &lt;li> tag with text
+                    let reason_item = document.createElement("li");
+                    reason_item.innerText = reason;
+
+                    // And append it
+                    reasons_list.appendChild(reason_item);
+                });
+
+                // Show "Dangerous" section
+                document.getElementById("dangerous").classList.remove("hidden");
+                // And hide "Main" section
+                document.getElementById("main").classList.add("hidden");
+
+            } else {
+
+                // I want to show different message for safe websites and browser's URLs
+                // (for example home, history, etc.)
+                if (!response.data.isBrowser) {
+
+                    // Show "Safe" section
+                    document.getElementById("safe").classList.remove("hidden");
+                    // Hide "Main" section
+                    document.getElementById("main").classList.add("hidden");
+
+                }
+            }
+        })
+    });
+});</code></pre>
         </article>
     </section>
 

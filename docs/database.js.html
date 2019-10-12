@@ -54,6 +54,14 @@
  * @param {string} original URL which should match the rule.
  * @param {string} rule Rule for matching. Use * as wildcard for any number of
  * characters.
+ * @returns {boolean} If there was found a match.
+ * @example
+ * // Returns true
+ * urlMatch("http://my.website.com/", "*website.com*")
+ * @example
+ * // There should be match, but there is not. Without wildcards (*), the https:// and 
+ * // trailing slash (/) make it fail to find a match.
+ * urlMatch("https://my.website.com/", "my.website.com")
  */
 function urlMatch(original, rule) {
     var escapeRegex = (original) => original.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -64,13 +72,23 @@ function urlMatch(original, rule) {
  * Checks if obj contains all keys in listOfKeys.
  * @param {object} obj Object which is checked.
  * @param {array} listOfKeys List of all keys required inside the object.
+ * @returns {boolean} If object contains all required keys.
+ * @example
+ * // Returns true
+ * hasKeys({one: "test", two: 2}, ["one", "two"])
+ * @example
+ * // Returns false - object is empty
+ * hasKeys({}, ["one", "two"])
+ * @example
+ * // Returns false - object does not have key "two"
+ * hasKeys({one: 1, three: "test"}, ["one", "two"])
  */
 function hasKeys(obj, listOfKeys) {
     // Object is empty
     if (Object.getOwnPropertyNames(obj).length == 0) {
         return false;
     }
-    
+
     if (!Array.isArray(listOfKeys) || listOfKeys.length == 0) {
         throw TypeError("List of keys has to be an array");
     }
@@ -86,24 +104,37 @@ function hasKeys(obj, listOfKeys) {
 };
 
 /**
- * Check if url is an internal one (used by the browser).
+ * Check if url is an internal one (used by the browser). Currently, only
+ * chrome:// protocol and about: prefix (in Firefox) is tested. So when
+ * urls starts with one of those two "strings", it is matched as
+ * internal browser URL.
  * @param {string} url_check Current URL which should be tested.
+ * @returns {boolean} Is it an internal URL
+ * @example
+ * // Returns true
+ * isBrowserUrl("chrome://about")
+ * @example
+ * // Returns true
+ * isBrowserUrl("about:about")
+ * @example
+ * // Returns false
+ * isBrowserUrl("https://my.website.com")
  */
 function isBrowserUrl(url_check) {
-    
+
     if (typeof url_check !== "string") {
         throw TypeError("Url is not a string.");
     }
 
     let url = new URL(url_check);
-    
+
     // In chrome, all internal URLs start with chrome:// protocol
     if (browser_url_list.includes(url.protocol)) {
         return true;
     }
 
     // In firefox, internal urls start with about:
-    for(let browser_url of browser_url_list) {
+    for (let browser_url of browser_url_list) {
         if (url_check.startsWith(browser_url)) {
             return true;
         }
@@ -113,7 +144,7 @@ function isBrowserUrl(url_check) {
 }
 
 /**
- * Asynchronously return local user settings.
+ * Asynchronously returns local user settings.
  */
 function getLocalSettings() {
     return new Promise((resolve, reject) => {
@@ -133,14 +164,14 @@ function getLocalSettings() {
  * @param {string} url_check URL for which should be the settings returned.
  */
 async function getUserSettingsForUrl(url_check) {
-    
+
     let defaut_settings = {
         ignore: false,
         lastPopup: "1990-01-01T01:01:01"
     };
 
     let settings = await getLocalSettings();
-    
+
     if (url_check in settings.websites) {
         return settings.websites[url_check];
     }
@@ -175,7 +206,7 @@ function getLocalDatabase() {
  */
 async function getUrlInfo(url_check) {
 
-    let default_info ={
+    let default_info = {
         info: {},
         isDangerous: false,
         isBrowser: isBrowserUrl(url_check),
@@ -189,21 +220,23 @@ async function getUrlInfo(url_check) {
     let database = await getLocalDatabase();
 
     for (record of database) {
-        // This record's URL is matching with url_check
-        if (urlMatch(url_check, record.url)) {
-            // Get settings for URL
-            let settings = await getUserSettingsForUrl(record.url);
-            
-            // Merge default settings with new data
-            Object.assign(default_info, {
-                info: record,
-                isDangerous: true,
-                linkMoreInfo: "TODO"
-            }, {
-                userSettings: settings
-            });
+        for (link in record.links) {
+            // This record's URL is matching with url_check
+            if (urlMatch(url_check, link)) {
+                // Get settings for URL
+                let settings = await getUserSettingsForUrl(link);
 
-            return default_info;
+                // Merge default settings with new data
+                Object.assign(default_info, {
+                    info: record,
+                    isDangerous: true,
+                    linkMoreInfo: "TODO"
+                }, {
+                    userSettings: settings
+                });
+
+                return default_info;
+            }
         }
     }
 
@@ -214,30 +247,38 @@ async function getUrlInfo(url_check) {
 
 /**
  * Checks for updates and downloads them if necessary.
- * @returns True if database was updated.
+ * @returns {boolean} True if database was updated.
  */
 async function updateDatabase() {
-    chrome.storage.sync.get(["database_last_change"], (result) => {
-        apiGetDatabaseInfo().then((info) => {
+    chrome.storage.sync.get(["database_last_change", "api_key"], (result) => {
+        apiGetDatabaseInfo(result.api_key).then((info) => {
             // Is offline database outdated?
-            if ( Date.parse(info.last_edit) > Date.parse(result.database_last_change) ) {
+            if (Date.parse(info.last_edit) > Date.parse(result.database_last_change)) {
                 // Download updates
-                apiGetDatabase().then(db => {
-                    
-                    let data = db["data"];
-                    // And store them
-                    chrome.storage.sync.set({database: data});
+                apiGetDatabase(result.api_key).then(db => {
 
-                    chrome.storage.sync.set({database_last_change: info.last_change});
+                    if (db === false) {
+                        showError("Update");
+                        return false;
+                    }
+
+                    // And store them
+                    chrome.storage.sync.set({
+                        database: db
+                    });
+
+                    chrome.storage.sync.set({
+                        database_last_change: info.last_change
+                    });
+
                     return true;
                 });
             }
         });
-        
+
         return false;
     });
-}
-</code></pre>
+}</code></pre>
         </article>
     </section>
 
@@ -247,13 +288,13 @@ async function updateDatabase() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#API_URL_INFO_ENDPOINT">API_URL_INFO_ENDPOINT</a></li><li><a href="global.html#API_URL_REPORT_ENDPOINT">API_URL_REPORT_ENDPOINT</a></li><li><a href="global.html#API_URL_UPDATE_ENDPOINT">API_URL_UPDATE_ENDPOINT</a></li><li><a href="global.html#apiGetDatabase">apiGetDatabase</a></li><li><a href="global.html#apiGetDatabaseInfo">apiGetDatabaseInfo</a></li><li><a href="global.html#apiReportSite">apiReportSite</a></li><li><a href="global.html#browser_url_list">browser_url_list</a></li><li><a href="global.html#getLocalDatabase">getLocalDatabase</a></li><li><a href="global.html#getLocalSettings">getLocalSettings</a></li><li><a href="global.html#getUrlInfo">getUrlInfo</a></li><li><a href="global.html#getUserSettingsForUrl">getUserSettingsForUrl</a></li><li><a href="global.html#hasKeys">hasKeys</a></li><li><a href="global.html#isBrowserUrl">isBrowserUrl</a></li><li><a href="global.html#replacePlaceholders">replacePlaceholders</a></li><li><a href="global.html#showPopup">showPopup</a></li><li><a href="global.html#translateHtml">translateHtml</a></li><li><a href="global.html#updateDatabase">updateDatabase</a></li><li><a href="global.html#urlMatch">urlMatch</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#animateDialog">animateDialog</a></li><li><a href="global.html#API_URL_INFO_ENDPOINT">API_URL_INFO_ENDPOINT</a></li><li><a href="global.html#API_URL_REGISTER_ENDPOINT">API_URL_REGISTER_ENDPOINT</a></li><li><a href="global.html#API_URL_REPORT_ENDPOINT">API_URL_REPORT_ENDPOINT</a></li><li><a href="global.html#API_URL_UPDATE_ENDPOINT">API_URL_UPDATE_ENDPOINT</a></li><li><a href="global.html#apiGetApiKey">apiGetApiKey</a></li><li><a href="global.html#apiGetDatabase">apiGetDatabase</a></li><li><a href="global.html#apiGetDatabaseInfo">apiGetDatabaseInfo</a></li><li><a href="global.html#apiReportSite">apiReportSite</a></li><li><a href="global.html#browser_url_list">browser_url_list</a></li><li><a href="global.html#getLocalDatabase">getLocalDatabase</a></li><li><a href="global.html#getLocalSettings">getLocalSettings</a></li><li><a href="global.html#getUrlInfo">getUrlInfo</a></li><li><a href="global.html#getUserSettingsForUrl">getUserSettingsForUrl</a></li><li><a href="global.html#hasKeys">hasKeys</a></li><li><a href="global.html#isBrowserUrl">isBrowserUrl</a></li><li><a href="global.html#replacePlaceholders">replacePlaceholders</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showPopup">showPopup</a></li><li><a href="global.html#translateHtml">translateHtml</a></li><li><a href="global.html#updateDatabase">updateDatabase</a></li><li><a href="global.html#urlMatch">urlMatch</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Sep 30 2019 09:48:36 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sat Oct 12 2019 19:35:26 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>
