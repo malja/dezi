@@ -25,5 +25,6 @@
  */
 const browser_url_list = [
     "chrome://",
+    "chrome-extension://",
     "about:"
 ];
